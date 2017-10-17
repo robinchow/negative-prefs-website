@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--Import Google Icon Font-->
+    <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" type="image/png" href="images/broken_heart.png" />
+  </head>
+
+  <body class="container">
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+
+    <div class="row">
+    {% if hates %}
+        {% if rand <= 0.25 %}
+        	<h2 class="center-align">{{ person }} HATES <span style="text-transform: capitalize">{{ thing }}</span></h2>
+        {% elif rand <= 0.5 %}
+        	<h2 class="center-align">{{ person }} DESPISES <span style="text-transform: capitalize">{{ thing }}</span></h2>
+        {% elif rand <= 0.75 %}
+        	<h2 class="center-align">{{ person }} LOATHES <span style="text-transform: capitalize">{{ thing }}</span></h2>
+        {% else %}
+        	<h2 class="center-align">{{ person }} ABHORS <span style="text-transform: capitalize">{{ thing }}</span></h2>
+        {% endif %}
+    {% elif likes %}
+        {% if rand <= 0.5 %}
+	        <h3 class="center-align">{{ person }} likes {{ thing }} ... for now.</h3>
+        {% elif rand <= 0.666666 %}
+            <h3 class="center-align">{{ person }} approves of {{ thing }}.</h3>
+        {% else %}
+	        <h3 class="center-align">{{ person }} is ok with {{ thing }}.</h3>
+        {% endif %}
+    {% else %}
+        {% if rand <= 0.5 %}
+	        <h3 class="center-align">Not sure if {{ person }} hates {{ thing }}, but most likely.</h3>
+        {% elif rand <= 0.666666 %}
+	        <h3 class="center-align">{{ person }} has no obvious hate for {{ thing }}, but you never know.</h3>
+        {% else %}
+	        <h3 class="center-align">{{ person }} probably hates {{ thing }} on the inside.</h3>
+        {% endif %}
+    {% endif %}
+    </div>
+
+    <div class="row">
+    <a href="/">Check something else ...</a>
+    </div>
+  </body>
+</html>
+
