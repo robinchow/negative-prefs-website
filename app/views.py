@@ -1,8 +1,10 @@
 from flask import jsonify, render_template, request
-from app import app, mongo
+from app import app, mongo, config, sg
+from sendgrid.helpers.mail import *
 import codecs, json, os.path, random
 
-person = 'Default'
+person = config['General']['Person']
+
 prefs = None
 prefs_file = '%s-prefs.json' % (person,)
 
@@ -42,8 +44,11 @@ def check():
     elif thing in prefs['likes']:
         likes = True
     else:
-        # TODO: email person
-        pass
+        try:
+            email_person("Unknown search", 'Someone asked if you hate %s' % (thing,))
+        except Exception as inst:
+            print(type(inst))
+            print(inst)
 
     return render_template('response.html', person=person, hates=hates, likes=likes, thing=thing, rand=rand)
     
@@ -124,3 +129,22 @@ def list_searches():
 def json_error(msg=None):
     return jsonify(status='error', msg=msg)
 
+def email_person(subject, text_content, html_content=None):
+    global config, person
+
+    send_email = config['Sendgrid']['SendAs']
+    send_name = config['General']['EmailSendName']
+    mail = Mail()
+    mail.from_email = Email(send_email, send_name)
+    mail.subject = subject
+
+    personalization = Personalization()
+    for email in (y for (_, y) in config.items('Emails') if y):
+        personalization.add_to(Email(email, email))
+    mail.add_personalization(personalization)
+
+    mail.add_content(Content("text/plain", text_content))
+    if html_content:
+        mail.add_content(Content("text/html", html_content))
+
+    response = sg.client.mail.send.post(request_body=mail.get())
