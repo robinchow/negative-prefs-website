@@ -35,12 +35,17 @@ def check():
     
     rand = random.random()
 
+    hates = False
+    likes = False
     if thing in prefs['hates']:
-        return render_template('response.html', person=person, hates=True, likes=False, thing=thing, rand=rand)
+        hates = True
     elif thing in prefs['likes']:
-        return render_template('response.html', person=person, hates=False, likes=True, thing=thing, rand=rand)
+        likes = True
     else:
-        return render_template('response.html', person=person, hates=False, likes=False, thing=thing, rand=rand)
+        # TODO: email person
+        pass
+
+    return render_template('response.html', person=person, hates=hates, likes=likes, thing=thing, rand=rand)
     
 @app.route('/update', methods=['GET'])
 def update_view():
