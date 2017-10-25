@@ -103,9 +103,9 @@ def update():
     return jsonify(status='ok')
 
 @app.route('/get_db', methods=['GET'])
-def get_db_json():
+def get_db():
     global prefs
-    return json.dumps(prefs, indent=2)
+    return jsonify(prefs)
     
 @app.route('/list', methods=['GET'])
 def list_view():
