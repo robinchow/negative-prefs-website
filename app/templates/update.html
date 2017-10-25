@@ -16,6 +16,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 
     <div class="row">
+      <div class="col s12">
       <form id="update-form" action="#">
 		<h4>{{ person }}</h4>
 		<p>
@@ -32,9 +33,21 @@
             <i class="material-icons right">send</i>
         </button>
       </form>
+      </div>
     </div>
     <div class="row">
-        <pre id="db-json" style="font-family:Courier,monospace;"></pre>
+      <div class="col s12">
+        <ul class="collapsible" data-collapsible="accordion">
+          <li>
+            <div class="collapsible-header">
+              Database
+            </div>
+            <div class="collapsible-body">
+              <pre id="db-json" style="font-family:Courier,monospace;"></pre>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <div class="row">
