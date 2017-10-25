@@ -93,16 +93,17 @@
                 $speed_list.empty();
                 $.each(data.search_results, function (i, search) {
                     if (_.includes(db.hates, search._id)
-                        || _.includes(db.likes, search._id))
+                        || _.includes(db.likes, search._id)
+                        || _.includes(db.ignores, search._id))
                         return;
 
                     var escaped = _.escape(search._id);
                     $speed_list.append(
                         '<div class="chip" data-thing="' + escaped + '">' +
                         escaped +
-                        '<i class="chip-btn material-icons speed-add" data-pref="ignores">clear</i>' +
-                        '<i class="chip-btn material-icons red-text text-accent-4 speed-add" data-pref="hates">thumb_down</i>' +
-                        '<i class="chip-btn material-icons light-green-text text-lighten-1 speed-add" data-pref="likes">thumb_up</i>' +
+                        '<i class="chip-btn material-icons speed-add" data-pref="ignores" title="Ignore">clear</i>' +
+                        '<i class="chip-btn material-icons red-text text-accent-4 speed-add" data-pref="hates" title="Hate">thumb_down</i>' +
+                        '<i class="chip-btn material-icons light-green-text text-lighten-1 speed-add" data-pref="likes" title="Like">thumb_up</i>' +
                         '</div>');
                 });
             });
