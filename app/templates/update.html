@@ -8,12 +8,24 @@
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="icon" type="image/png" href="images/broken_heart.png" />
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/lodash@4.17.4/lodash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+
+    <style>
+    .chip-btn {
+        cursor: pointer;
+        float: right;
+        font-size: 16px;
+        line-height: 32px;
+        padding-left: 8px;
+    }
+    </style>
   </head>
 
   <body class="container">
-    <!--Import jQuery before materialize.js-->
-    <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 
     <div class="row">
       <div class="col s12">
@@ -40,6 +52,14 @@
         <ul class="collapsible" data-collapsible="accordion">
           <li>
             <div class="collapsible-header">
+              Quick Add
+            </div>
+            <div class="collapsible-body">
+                <div id="speed-list"></div>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header">
               Database
             </div>
             <div class="collapsible-body">
@@ -56,22 +76,42 @@
 
     <script type="text/javascript">
     function refresh_db_display() {
+        var db = null;
+
         $.get("get_db", function (data) {
             console.log('db', data);
+            db = data;
             $('#db-json').text(JSON.stringify(data, null, 2));
+        })
+        .done(function () {
+            $.get("list_searches", function (data) {
+                console.log('searches', data);
+
+                if (!db) return;
+
+                var $speed_list = $("#speed-list");
+                $speed_list.empty();
+                $.each(data.search_results, function (i, search) {
+                    if (_.includes(db.hates, search._id)
+                        || _.includes(db.likes, search._id))
+                        return;
+
+                    var escaped = _.escape(search._id);
+                    $speed_list.append(
+                        '<div class="chip" data-thing="' + escaped + '">' +
+                        escaped +
+                        '<i class="chip-btn material-icons speed-add" data-pref="ignores">clear</i>' +
+                        '<i class="chip-btn material-icons red-text text-accent-4 speed-add" data-pref="hates">thumb_down</i>' +
+                        '<i class="chip-btn material-icons light-green-text text-lighten-1 speed-add" data-pref="likes">thumb_up</i>' +
+                        '</div>');
+                });
+            });
         });
     }
 
-    $("#update-form").submit(function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var $elem = $(e.target);
-        var updateObj = {};
-        $.each($elem.serializeArray(), function (i, field) {
-            updateObj[field.name] = field.value;
-        });
+    function post_update(updateObj) {
         var json = JSON.stringify(updateObj);
-        console.log(updateObj, json);
+        console.log('update', updateObj);
         $.ajax({
             accepts: "application/json",
             contentType: "application/json",
@@ -83,6 +123,27 @@
                 refresh_db_display();
             }
         });
+    }
+
+    $(document).on('click', '.speed-add', function (e) {
+        $target = $(e.target);
+        var updateObj = {
+            pref: $target.data('pref'),
+            thing: $target.parent().data('thing'),
+            action: 'add'
+        };
+        post_update(updateObj);
+    });
+
+    $("#update-form").submit(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $elem = $(e.target);
+        var updateObj = {};
+        $.each($elem.serializeArray(), function (i, field) {
+            updateObj[field.name] = field.value;
+        });
+        post_update(updateObj);
         $("#thing").val("");
     });
     
