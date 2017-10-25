@@ -49,7 +49,7 @@
     </div>
     <div class="row">
       <div class="col s12">
-        <ul class="collapsible" data-collapsible="accordion">
+        <ul class="collapsible" data-collapsible="">
           <li>
             <div class="collapsible-header">
               Quick Add
@@ -61,6 +61,19 @@
           <li>
             <div class="collapsible-header">
               Database
+            </div>
+            <div class="collapsible-body">
+                <h4>Hates <i class="material-icons red-text text-accent-4">thumb_down</i></h4>
+                <div id="db-list-hates"></div>
+                <h4>Likes <i class="material-icons light-green-text text-lighten-1">thumb_up</i></h4>
+                <div id="db-list-likes"></div>
+                <h4>Ignored <i class="material-icons">not_interested</i></h4>
+                <div id="db-list-ignores"></div>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header">
+              Database (JSON)
             </div>
             <div class="collapsible-body">
               <pre id="db-json" style="font-family:Courier,monospace;"></pre>
@@ -75,6 +88,13 @@
     </div>
 
     <script type="text/javascript">
+    var icons = {
+        hates: 'thumb_down',
+        likes: 'thumb_up',
+        ignores: 'not_interested',
+        remove: 'clear'
+    };
+
     function refresh_db_display() {
         var db = null;
 
@@ -82,6 +102,38 @@
             console.log('db', data);
             db = data;
             $('#db-json').text(JSON.stringify(data, null, 2));
+            $.each(_.keys(data), function (i, pref) {
+                var $pref = $('#db-list-' + pref);
+                $pref.empty();
+                $.each(data[pref], function (j, thing) {
+                    var escaped = _.escape(thing);
+                    var actions = '';
+
+                    if (pref === 'hates') {
+                        actions =
+                            '<i class="chip-btn material-icons speed-add" data-pref="hates" data-action="remove" title="Remove">'+icons.remove+'</i>' +
+                            '<i class="chip-btn material-icons speed-add" data-pref="ignores" title="Ignore">'+icons.ignores+'</i>' +
+                            '<i class="chip-btn material-icons light-green-text text-lighten-1 speed-add" data-pref="likes" title="Like">'+icons.likes+'</i>';
+                    }
+                    else if (pref === 'likes') {
+                        actions =
+                            '<i class="chip-btn material-icons speed-add" data-pref="likes" data-action="remove" title="Remove">'+icons.remove+'</i>' +
+                            '<i class="chip-btn material-icons speed-add" data-pref="ignores" title="Ignore">'+icons.ignores+'</i>' +
+                            '<i class="chip-btn material-icons red-text text-accent-4 speed-add" data-pref="hates" title="Hate">'+icons.hates+'</i>';
+                    }
+                    else if (pref === 'ignores') {
+                        actions =
+                            '<i class="chip-btn material-icons speed-add" data-pref="ignores" data-action="remove" title="Remove">'+icons.remove+'</i>' +
+                            '<i class="chip-btn material-icons light-green-text text-lighten-1 speed-add" data-pref="likes" title="Like">'+icons.likes+'</i>' +
+                            '<i class="chip-btn material-icons red-text text-accent-4 speed-add" data-pref="hates" title="Hate">'+icons.hates+'</i>';
+                    }
+
+                    $pref.append(
+                       '<div class="chip" data-thing="' + escaped +'">' +
+                       escaped + actions +
+                       '</div>');
+                });
+            });
         })
         .done(function () {
             $.get("list_searches", function (data) {
@@ -101,9 +153,9 @@
                     $speed_list.append(
                         '<div class="chip" data-thing="' + escaped + '">' +
                         escaped +
-                        '<i class="chip-btn material-icons speed-add" data-pref="ignores" title="Ignore">clear</i>' +
-                        '<i class="chip-btn material-icons red-text text-accent-4 speed-add" data-pref="hates" title="Hate">thumb_down</i>' +
-                        '<i class="chip-btn material-icons light-green-text text-lighten-1 speed-add" data-pref="likes" title="Like">thumb_up</i>' +
+                        '<i class="chip-btn material-icons speed-add" data-pref="ignores" title="Ignore">'+icons.ignores+'</i>' +
+                        '<i class="chip-btn material-icons light-green-text text-lighten-1 speed-add" data-pref="likes" title="Like">'+icons.likes+'</i>' +
+                        '<i class="chip-btn material-icons red-text text-accent-4 speed-add" data-pref="hates" title="Hate">'+icons.hates+'</i>' +
                         '</div>');
                 });
             });
@@ -131,7 +183,7 @@
         var updateObj = {
             pref: $target.data('pref'),
             thing: $target.parent().data('thing'),
-            action: 'add'
+            action: $target.data('action') || 'add'
         };
         post_update(updateObj);
     });
