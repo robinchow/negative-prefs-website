@@ -35,7 +35,13 @@ def check():
         "thing": thing
     })
     
-    rand = random.random()
+    # `rand` controls the phrases used when rendering the final template
+    # we accept `rand` as a query parameter for debugging purposes
+    rand = -1.0
+    try:
+        rand = float(request.args.get('rand', ''))
+    except ValueError:
+        rand = random.random()
 
     hates = False
     likes = False
