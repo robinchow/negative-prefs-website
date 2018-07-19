@@ -1,5 +1,7 @@
 from flask import jsonify, render_template, request
-from app import app, mongo, config, sg
+from app import app, Search, config, sg
+from collections import defaultdict
+from playhouse.shortcuts import model_to_dict
 from sendgrid.helpers.mail import *
 import codecs, json, os.path, random
 
@@ -29,12 +31,19 @@ def check():
     if not thing:
         return render_template('empty_input.html')
 
+    '''
     mongo.db.searches.insert_one({
         "ip": request.headers.get('X-Forwarded-For') or  request.remote_addr,
         "url": request.url,
         "thing": thing
     })
-    
+    '''
+    Search.create(
+        ip = request.headers.get('X-Forwarded-For') or  request.remote_addr,
+        url = request.url,
+        thing = thing
+    )
+
     # `rand` controls the phrases used when rendering the final template
     # we accept `rand` as a query parameter for debugging purposes
     rand = -1.0
@@ -119,6 +128,7 @@ def list_view():
     global person, prefs
     return render_template('list.html', person=person, hates=prefs['hates'], likes=prefs['likes'])
 
+'''
 @app.route('/list_searches', methods=['GET'])
 def list_searches():
     from bson.json_util import dumps
@@ -142,6 +152,16 @@ def list_searches():
     ]
 
     return jsonify(count=coll.count(), search_results=list(coll.aggregate(pipeline)))
+'''
+@app.route('/list_searches', methods=['GET'])
+def list_searches():
+    res = defaultdict(int)
+    for s in Search.select():
+        res[s.thing] += 1
+    return jsonify(
+        count=Search.select().count(),
+        search_results=[{'_id': x, 'count': y} for (x, y) in res.items()]
+    )
 
 def json_error(msg=None):
     return jsonify(status='error', msg=msg)
