@@ -30,7 +30,7 @@ def check():
         return render_template('empty_input.html')
 
     mongo.db.searches.insert_one({
-        "ip": request.remote_addr,
+        "ip": request.headers.get('X-Forwarded-For') or  request.remote_addr,
         "url": request.url,
         "thing": thing
     })
@@ -51,7 +51,8 @@ def check():
         likes = True
     else:
         try:
-            email_person("Unknown search", 'Someone asked if you hate %s' % (thing,))
+            # email_person("Unknown search", 'Someone asked if you hate %s' % (thing,))
+            pass
         except Exception as inst:
             print(type(inst))
             print(inst)
@@ -125,6 +126,16 @@ def list_searches():
 
     coll = mongo.db.searches
     
+    raw = request.args.get('raw', '').lower()
+    if raw:
+        return app.response_class(
+            dumps({
+                'count': coll.count(),
+                'search_results': coll.find()
+            }),
+            mimetype=app.config['JSONIFY_MIMETYPE']
+        )
+
     pipeline = [
         {"$group": {"_id": "$thing", "count": {"$sum": 1}}},
         {"$sort": SON([("count", -1), ("_id", -1)])}
